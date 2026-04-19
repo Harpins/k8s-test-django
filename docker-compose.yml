@@ -1,14 +1,12 @@
-version: "3"
-
 services:
   db:
     image: postgres:12.0-alpine
     volumes:
       - db_data:/var/lib/postgresql/data
     environment:
-      POSTGRES_DB: ${POSTGRES_DB-test_k8s}
-      POSTGRES_USER: ${POSTGRES_USER-test_k8s}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD-OwOtBep9Frut}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
 
   web:
     build: backend_main_django
@@ -16,10 +14,10 @@ services:
     volumes:
       - ./backend_main_django:/code
     environment: 
-      SECRET_KEY: ${WEB_SECRET_KEY-REPLACE_ME}
-      DEBUG: ${WEB_DEBUG-TRUE}
-      DATABASE_URL: ${WEB_DATABASE_URL-postgres://test_k8s:OwOtBep9Frut@db:5432/test_k8s}
-      ALLOWED_HOSTS: ${WEB_ALLOWED_HOSTS-127.0.0.1,localhost}
+      SECRET_KEY: ${SECRET_KEY}
+      DEBUG: ${DEBUG}
+      DATABASE_URL: ${DATABASE_URL}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS}
     ports:
       - 127.0.0.1:8080:80
     depends_on:
