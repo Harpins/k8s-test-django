@@ -134,17 +134,42 @@ docker run -d \
 # Шаг 6: Примените манифесты В ПРАВИЛЬНОМ ПОРЯДКЕ
 
 ## 1. Создайте пространство имен
+```bash
 kubectl apply -f k8s/namespace.yaml
+```
 
 ## 2. Создайте секреты и конфигурацию
+```bash
 kubectl apply -f k8s/secrets.yaml
 kubectl apply -f k8s/configmap.yaml
+```
 
 ## 3. Разверните приложение
+```bash
 kubectl apply -f k8s/deployment.yaml
+```
 
 ## 4. Создайте сервис для доступа извне
+```bash
 kubectl apply -f k8s/service.yaml
+```
+
+## 5. Настройте Ingress (для доступа по домену)
+Подробности настройки на Windows [тут](#настройка-ingress-с-туннелированием-на-windows)
+```bash
+kubectl apply -f k8s/ingress.yaml
+```
+
+## 6. Настройте CronJob (автоматическая очистка сессий)
+```bash
+kubectl apply -f k8s/cronjob.yaml
+```
+По умолчанию очистка сессий проходит каждый день в 3:00 ночи. Для изменения расписания нужно отредактировать файл `cronjob.yaml`:
+
+```yaml
+spec:
+  schedule: "0 3 * * *"
+```
 
 # Шаг 7: Проверьте статус развертывания и логи пода с приложением
 
@@ -179,9 +204,7 @@ kubectl exec -n django-app -it <pod-name> -- python manage.py createsuperuser
 kubectl exec -n django-app <pod-name> -- python manage.py collectstatic --noinput
 ```
 
-# Шаг 9: Получите доступ к приложению через Ingress
-
-## Настройка Ingress с туннелированием на Windows
+# Настройка Ingress с туннелированием на Windows
 
 ### Особенности Minikube на Windows с драйвером Docker
 
