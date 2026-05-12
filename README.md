@@ -83,3 +83,106 @@ $ docker compose build web
 `ALLOWED_HOSTS` -- настройка Django со списком разрешённых адресов. Если запрос прилетит на другой адрес, то сайт ответит ошибкой 400. Можно перечислить несколько адресов через запятую, например `127.0.0.1,192.168.0.1,site.test`. [Документация Django](https://docs.djangoproject.com/en/3.2/ref/settings/#allowed-hosts).
 
 `DATABASE_URL` -- адрес для подключения к базе данных PostgreSQL. Другие СУБД сайт не поддерживает. [Формат записи](https://github.com/jacobian/dj-database-url#url-schema).
+
+
+## Развертывание в Minikube
+
+### Предварительные требования
+
+- Установленный [Minikube](https://minikube.sigs.k8s.io/docs/start/)
+- Установленный [kubectl](https://kubernetes.io/docs/tasks/tools/)
+- Docker Desktop (для Windows) или Docker (для Linux/Mac)
+- База данных PostgreSQL, запущенная отдельно (или используйте внешний хост)
+
+### Шаг 1: Запустите Minikube (например, на базе Docker)
+
+```bash
+minikube start --driver=docker
+```
+
+### Шаг 2: Соберите Docker образ приложения
+
+```bash
+docker build -t django_app:latest ./backend_main_django
+```
+
+### Шаг 3: Загрузите образ в Minikube
+
+```bash
+minikube image load django_app:latest
+```
+
+### Шаг 4: Запустите внешнюю БД, например в контейнере Docker
+
+```bash
+docker run -d \
+  --name postgres-external \
+  -p 5432:5432 \
+  -e POSTGRES_DB=django_db \
+  -e POSTGRES_USER=django_user \
+  -e POSTGRES_PASSWORD=postgres123 \
+  postgres:12.0-alpine
+```
+Для доступа из Minikube используйте внутренний хост докера `host.docker.internal`
+
+### Шаг 5: Настройте конфиги и секреты
+
+Для настройки конфигурации укажите актуальные данные в `k8s/configmap.yaml`. 
+
+Для задания секретов используйте в качестве примера `k8s/secret_example.yaml`. Скопируйте его содержимое в `k8s/secret.yaml` и укажите в новом файле действительные значения переменных `secret-key` и `postgres-password`.
+
+### Шаг 6: Примените манифесты В ПРАВИЛЬНОМ ПОРЯДКЕ
+
+# 1. Создайте пространство имен
+kubectl apply -f k8s/namespace.yaml
+
+# 2. Создайте секреты и конфигурацию
+kubectl apply -f k8s/secrets.yaml
+kubectl apply -f k8s/configmap.yaml
+
+# 3. Разверните приложение
+kubectl apply -f k8s/deployment.yaml
+
+# 4. Создайте сервис для доступа извне
+kubectl apply -f k8s/service.yaml
+
+### Шаг 7: Проверьте статус развертывания и логи пода с приложением
+
+```bash
+kubectl get all -n django-app
+kubectl logs -n django-app -l app=django
+```
+
+### Шаг 8: Выполните миграции в БД
+
+# Найдите имя пода с джанго-приложением и запомните. В последующих командах замените `<pod-name>` на актуальное
+
+```bash
+kubectl get pods -n django-app
+```
+
+# Выполните миграции
+
+```bash
+kubectl exec -n django-app <pod-name> -- python manage.py migrate
+```
+
+# Создайте суперпользователя
+
+```bash
+kubectl exec -n django-app -it <pod-name> -- python manage.py createsuperuser
+```
+
+# Соберите статические файлы (опционально)
+
+```bash
+kubectl exec -n django-app <pod-name> -- python manage.py collectstatic --noinput
+```
+
+### Шаг 9: Получите доступ к приложению
+
+Доступ к приложению можно получить,например, через minikube-туннель. 
+
+```bash
+minikube service django-service -n django-app
+```

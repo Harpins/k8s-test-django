@@ -6,7 +6,7 @@ metadata:
 data:
   DEBUG: "False"
   ALLOWED_HOSTS: "*"
-  POSTGRES_DB: "django_db"
+  POSTGRES_DB: "django_db" 
   POSTGRES_USER: "django_user"
-  POSTGRES_HOST: "host.docker.internal"
+  POSTGRES_HOST: "host.docker.internal" 
   POSTGRES_PORT: "5432"
