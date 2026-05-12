@@ -112,7 +112,9 @@ docker build -t django_app:latest ./backend_main_django
 minikube image load django_app:latest
 ```
 
-# Шаг 4: Запустите внешнюю БД, например в контейнере Docker
+# Шаг 4: Запустите Postgres
+
+Во внешнем контейнере docker:
 
 ```bash
 docker run -d \
@@ -124,6 +126,10 @@ docker run -d \
   postgres:12.0-alpine
 ```
 Для доступа из Minikube используйте внутренний хост докера `host.docker.internal`
+
+
+
+
 
 # Шаг 5: Настройте конфиги и секреты
 

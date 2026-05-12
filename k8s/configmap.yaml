@@ -8,5 +8,5 @@ data:
   ALLOWED_HOSTS: "*"
   POSTGRES_DB: "django_db" 
   POSTGRES_USER: "django_user"
-  POSTGRES_HOST: "host.docker.internal" 
+  POSTGRES_HOST: "postgres-postgresql.django-app.svc.cluster.local" 
   POSTGRES_PORT: "5432"
