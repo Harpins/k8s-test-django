@@ -112,9 +112,9 @@ docker build -t django_app:latest ./backend_main_django
 minikube image load django_app:latest
 ```
 
-# Шаг 4: Запустите Postgres
+# Шаг 4: Запустите и настройте Postgres
 
-Во внешнем контейнере docker:
+## а. Во внешнем контейнере docker:
 
 ```bash
 docker run -d \
@@ -125,10 +125,48 @@ docker run -d \
   -e POSTGRES_PASSWORD=postgres123 \
   postgres:12.0-alpine
 ```
-Для доступа из Minikube используйте внутренний хост докера `host.docker.internal`
+Для доступа из Minikube используйте в конфиге внутренний хост докера `host.docker.internal`
 
+## б. Развертывание PostgreSQL в кластере с помощью Helm
 
+Helm — это пакетный менеджер для Kubernetes, который позволяет устанавливать сложные приложения (в том числе, PostgreSQL) одной командой, вместо создания множества YAML-файлов вручную.
 
+### Установка Helm на Windows с помощью Chocolatey
+
+В Windows PowerShell (WIN+X) выполните строго от имени администратора:
+```bash
+choco install kubernetes-helm -y
+```
+
+Bitnami больше не поддерживает классический Helm-репозиторий, поэтому устанавливаем Postgres однострочной командой WPS (НЕ от администратора):
+
+```bash
+helm install postgres oci://registry-1.docker.io/bitnamicharts/postgresql --namespace django-app --create-namespace --set auth.postgresPassword=yourstrongpassword --set auth.database=django_db --set auth.username=django_user --set primary.persistence.size=10Gi
+```
+
+Проверка установки:
+
+```bash
+kubectl get pods -n django-app 
+kubectl get svc -n django-app
+```
+
+В списках подов и сервисов должны появиться связанные с postgres-postgresql.
+
+#### ВАЖНО - Получите реальный пароль от БД и обновите секреты.
+
+Когда вы устанавливаете PostgreSQL через Helm, даже если вы указали свой пароль, Helm может сгенерировать случайный пароль для пользователя БД. Для получения реального пароля выполните в WPS построчно:
+
+```
+$encoded = kubectl get secret --namespace django-app postgres-postgresql -o jsonpath="{.data.password}"
+$bytes = [System.Convert]::FromBase64String($encoded)
+$password = [System.Text.Encoding]::UTF8.GetString($bytes)
+Write-Host "Пароль: $password"
+```
+
+Реальный пароль необходимо подставить в `secret.stringData.postgres-password`, после чего обновить манифест с секретами.
+
+#### Укажите хост БД configmap.yaml - POSTGRES_HOST:postgres-postgresql.django-app.svc.cluster.local
 
 
 # Шаг 5: Настройте конфиги и секреты
@@ -139,12 +177,12 @@ docker run -d \
 
 # Шаг 6: Примените манифесты В ПРАВИЛЬНОМ ПОРЯДКЕ
 
-## 1. Создайте пространство имен
+## 1. Определите пространство имен
 ```bash
 kubectl apply -f k8s/namespace.yaml
 ```
 
-## 2. Создайте секреты и конфигурацию
+## 2. Примените секреты и конфигурацию
 ```bash
 kubectl apply -f k8s/secrets.yaml
 kubectl apply -f k8s/configmap.yaml
