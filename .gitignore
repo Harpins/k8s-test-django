@@ -9,3 +9,4 @@ __pycache__/
 k8s/*-secret.yaml
 k8s/secret.yaml
 *.secret.yaml
+*.k8s\secret.yaml

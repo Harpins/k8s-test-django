@@ -1,0 +1,102 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: django-createsuperuser
+  namespace: django-app
+spec:
+  ttlSecondsAfterFinished: 600  
+  backoffLimit: 2 
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: createsuperuser
+        image: django_app:latest
+        imagePullPolicy: IfNotPresent
+        command:
+        - /bin/sh
+        - -c
+        - |
+          echo "=== Creating superuser from secrets ==="
+          python manage.py shell << EOF
+          import os
+          from django.contrib.auth import get_user_model
+          
+          username = os.environ.get('SUPERUSER_USERNAME', 'admin')
+          email = os.environ.get('SUPERUSER_EMAIL', 'admin@example.com')
+          password = os.environ.get('SUPERUSER_PASSWORD')
+          
+          User = get_user_model()
+          
+          if not User.objects.filter(username=username).exists():
+              if password:
+                  User.objects.create_superuser(username, email, password)
+                  print(f" Superuser '{username}' created successfully")
+                  print(f" Email: {email}")
+              else:
+                  print(f"✗ Error: SUPERUSER_PASSWORD is not set")
+                  exit(1)
+          else:
+              print(f"✓ Superuser '{username}' already exists, skipping")
+          
+          print("=== Superuser operation completed ===")
+          EOF
+        env:
+        - name: DEBUG
+          valueFrom:
+            configMapKeyRef:
+              name: django-config
+              key: DEBUG
+        - name: ALLOWED_HOSTS
+          valueFrom:
+            configMapKeyRef:
+              name: django-config
+              key: ALLOWED_HOSTS
+        - name: SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: django-secrets
+              key: secret-key
+        - name: POSTGRES_DB
+          valueFrom:
+            configMapKeyRef:
+              name: django-config
+              key: POSTGRES_DB
+        - name: POSTGRES_USER
+          valueFrom:
+            configMapKeyRef:
+              name: django-config
+              key: POSTGRES_USER
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: django-secrets
+              key: postgres-password
+        - name: POSTGRES_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: django-config
+              key: POSTGRES_HOST
+        - name: POSTGRES_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: django-config
+              key: POSTGRES_PORT
+        - name: DATABASE_URL
+          value: "postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@$(POSTGRES_HOST):$(POSTGRES_PORT)/$(POSTGRES_DB)"
+        
+        - name: SUPERUSER_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: django-secrets
+              key: superuser-username
+        - name: SUPERUSER_EMAIL
+          valueFrom:
+            secretKeyRef:
+              name: django-secrets
+              key: superuser-email
+        - name: SUPERUSER_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: django-secrets
+              key: superuser-password

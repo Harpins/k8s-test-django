@@ -178,30 +178,18 @@ kubectl get all -n django-app
 kubectl logs -n django-app -l app=django
 ```
 
-# Шаг 8: Выполните миграции в БД
+# Шаг 8: Выполните миграции в БД и создайте суперпользователя
 
-## Найдите имя пода с джанго-приложением и запомните. В последующих командах замените `<pod-name>` на актуальное
-
-```bash
-kubectl get pods -n django-app
-```
-
-## Выполните миграции
+## Запустите работу, исполняющую миграции и сборку статики
 
 ```bash
-kubectl exec -n django-app <pod-name> -- python manage.py migrate
+kubectl apply -f k8s/migrate-and-colstatic-job.yaml
 ```
 
 ## Создайте суперпользователя
 
 ```bash
-kubectl exec -n django-app -it <pod-name> -- python manage.py createsuperuser
-```
-
-## Соберите статические файлы (опционально)
-
-```bash
-kubectl exec -n django-app <pod-name> -- python manage.py collectstatic --noinput
+kubectl apply -f k8s\createsuperuser-job.yaml
 ```
 
 # Настройка Ingress с туннелированием на Windows
@@ -218,13 +206,10 @@ kubectl exec -n django-app <pod-name> -- python manage.py collectstatic --noinpu
 minikube addons enable ingress
 ```
 
-#### 2. Создайте манифест Ingress и примените конфигурацию
+#### 2. Создайте манифест Ingress
 
 В качестве примера используйте `k8s/ingress.yaml`
 
-```bash
-kubectl apply -f k8s/ingress.yaml
-```
 
 #### 3. Запустите Minikube Tunnel
 
