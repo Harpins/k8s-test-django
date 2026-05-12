@@ -179,10 +179,54 @@ kubectl exec -n django-app -it <pod-name> -- python manage.py createsuperuser
 kubectl exec -n django-app <pod-name> -- python manage.py collectstatic --noinput
 ```
 
-### Шаг 9: Получите доступ к приложению
+### Шаг 9: Получите доступ к приложению через Ingress
 
-Доступ к приложению можно получить,например, через minikube-туннель. 
+## Настройка Ingress с туннелированием на Windows
+
+### Особенности Minikube на Windows с драйвером Docker
+
+Когда Minikube запущен внутри Docker на Windows, его внутренняя сеть недоступна напрямую из основной операционной системы. Ingress работает, но его IP-адрес виден только внутри контейнера Minikube.
+
+### Решение: Использование Minikube Tunnel
+
+#### 1. Включите Ingress аддон
 
 ```bash
-minikube service django-service -n django-app
+minikube addons enable ingress
 ```
+
+#### 2. Создайте манифест Ingress и примените конфигурацию
+
+В качестве примера используйте `k8s/ingress.yaml`
+
+```bash
+kubectl apply -f k8s/ingress.yaml
+```
+
+#### 3. Запустите Minikube Tunnel
+
+Откройте новый терминал PowerShell от имени администратора и выполните:
+
+```bash
+minikube tunnel
+```
+
+Система может запросить разрешение на доступ к сети - нажмите «Разрешить» или «Да».
+
+Этот терминал должен оставаться открытым всё время работы с приложением!
+
+В этом случае туннелирование будет проводиться на локальный хост `127.0.0.1`
+
+#### 4. Добавьте запись в файл hosts
+
+Откройте файл `C:\Windows\System32\drivers\etc\hosts` из блокнота, запущенного от имени администратора, добавьте в конец строку `127.0.0.1  django.local` и сохраните:
+
+Опционально очистите DNS кэш
+
+```bash
+ipconfig /flushdns
+```
+
+#### 5. Проверьте доступность
+
+Откройте браузер и перейдите по адресу: `http://django.local`
