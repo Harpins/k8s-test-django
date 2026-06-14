@@ -14,7 +14,7 @@ spec:
       restartPolicy: Never
       containers:
       - name: migrate
-        image: #ДОБАВИТЬ
+        image: harpins/django_app:latest
         imagePullPolicy: Always
         
         command:

@@ -17,7 +17,7 @@ spec:
         spec:
           containers:
           - name: clear-sessions
-            image: #Добавить
+            image: harpins/django_app:latest
             imagePullPolicy: Always
             command:
             - python
