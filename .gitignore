@@ -24,4 +24,3 @@ yc-kubeconfig
 EOF
 
 ingress_config.txt
-nginx_config.yaml

@@ -72,7 +72,7 @@ $ docker compose build web
 Аналогичным образом можно удалять библиотеки из зависимостей.
 
 <a name="env-variables"></a>
-## Переменные окружения
+## Переменные окружения для локального тестирования приложения
 
 Образ с Django считывает настройки из переменных окружения:
 
@@ -283,4 +283,20 @@ ipconfig /flushdns
 
 Откройте браузер и перейдите по адресу: `http://django.local`
 
-# Развертывание в k8s-облаке yandex-cloud
+# Деплой в Yandex Cloud
+
+[Работающая версия сайта](https://edu-igor-derevnin.yc-sirius-dev.pelid.team)
+
+## Предварительные требования
+
+### Ресурсы Yandex Cloud
+Для 
+
+
+Ресурс	Название	Назначение
+Namespace	edu-igor-derevnin	Изолированное пространство
+Domain	edu-igor-derevnin.yc-sirius-dev.pelid.team	Внешний доступ
+PostgreSQL	edu-igor-derevnin	Managed PostgreSQL
+S3 Bucket	edu-igor-derevnin	Object Storage для статики/медиа
+ALB	Настроен админом	Application Load Balancer
+
