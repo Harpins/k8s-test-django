@@ -1,17 +1,23 @@
-FROM nginx/unit:1.25.0-python3.9
-ENV PYTHONUNBUFFERED 1
-ENV PYTHONDONTWRITEBYTECODE 1
+FROM python:3.11-slim
 
-WORKDIR /webapp
-COPY requirements.txt /webapp/
-RUN apt update && apt install -y python3-pip                                  \
-    && pip3 install -r requirements.txt                                       \
-    && apt remove -y python3-pip                                              \
-    && apt autoremove --purge -y                                              \
-    && rm -rf /var/lib/apt/lists/* /etc/apt/sources.list.d/*.list
-COPY unit_config.json /docker-entrypoint.d/
-COPY src /webapp/src
-WORKDIR /webapp/src
-RUN SECRET_KEY=empty python manage.py collectstatic --noinput
-EXPOSE 80
-VOLUME ["/media"]
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+
+WORKDIR /app
+
+RUN apt update && apt install -y --no-install-recommends \
+    gcc \
+    python3-dev \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY src/ /app/src/
+
+WORKDIR /app/src
+
+CMD ["gunicorn", "webapp.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "4", "--threads", "2"]
+
+EXPOSE 8000

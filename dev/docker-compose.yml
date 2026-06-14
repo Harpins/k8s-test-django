@@ -1,27 +1,50 @@
 services:
-  db:
-    image: postgres:12.0-alpine
+  web:
+    build: ./backend_main_django
+    image: #ДОБАВИТЬ
     volumes:
-      - db_data:/var/lib/postgresql/data
+      - ./backend_main_django:/code
     environment:
+      SECRET_KEY: ${SECRET_KEY}
+      DEBUG: ${DEBUG}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS}
+      DJANGO_SETTINGS_MODULE: "webapp.settings"
+      
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-
-  web:
-    build: backend_main_django
-    image: django_app
-    volumes:
-      - ./backend_main_django:/code
-    environment: 
-      SECRET_KEY: ${SECRET_KEY}
-      DEBUG: ${DEBUG}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
       DATABASE_URL: ${DATABASE_URL}
-      ALLOWED_HOSTS: ${ALLOWED_HOSTS}
+      
+      PGSSLMODE: ${PGSSLMODE}
+      PGSSLROOTCERT: ${PGSSLROOTCERT}
+      
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_STORAGE_BUCKET_NAME: ${AWS_STORAGE_BUCKET_NAME}
+      AWS_S3_ENDPOINT_URL: ${AWS_S3_ENDPOINT_URL}
+      AWS_S3_REGION_NAME: ${AWS_S3_REGION_NAME}
+      AWS_S3_SIGNATURE_VERSION: ${AWS_S3_SIGNATURE_VERSION}
+      AWS_QUERYSTRING_AUTH: ${AWS_QUERYSTRING_AUTH}
+      AWS_DEFAULT_ACL: ${AWS_DEFAULT_ACL}
+      
+      STATIC_URL: ${STATIC_URL}
+      MEDIA_URL: ${MEDIA_URL}
+      STATICFILES_STORAGE: ${STATICFILES_STORAGE}
+      DEFAULT_FILE_STORAGE: ${DEFAULT_FILE_STORAGE}
+      
+      SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE}
+      CSRF_COOKIE_SECURE: ${CSRF_COOKIE_SECURE}
+      SECURE_SSL_REDIRECT: ${SECURE_SSL_REDIRECT}
+      SECURE_HSTS_SECONDS: ${SECURE_HSTS_SECONDS}
+      SECURE_HSTS_INCLUDE_SUBDOMAINS: ${SECURE_HSTS_INCLUDE_SUBDOMAINS}
+      SECURE_BROWSER_XSS_FILTER: ${SECURE_BROWSER_XSS_FILTER}
+      SECURE_CONTENT_TYPE_NOSNIFF: ${SECURE_CONTENT_TYPE_NOSNIFF}
+      X_FRAME_OPTIONS: ${X_FRAME_OPTIONS}
+      
+      LOG_LEVEL: ${LOG_LEVEL}
+      DJANGO_LOG_LEVEL: ${DJANGO_LOG_LEVEL}
+    
     ports:
-      - 127.0.0.1:8080:80
-    depends_on:
-      - db
-
-volumes:
-  db_data:
+      - "127.0.0.1:8080:8000"
