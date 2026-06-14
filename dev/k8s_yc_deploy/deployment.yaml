@@ -71,4 +71,94 @@ spec:
         - name: PGSSLMODE
           value: "require"                          
         - name: PGSSLROOTCERT
-          value: "/etc/postgresql/root.crt"        
+          value: "/etc/postgresql/root.crt"
+
+        #S3
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: bucket
+              key: access_key
+
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: bucket
+              key: secret_key
+
+        - name: AWS_STORAGE_BUCKET_NAME
+          valueFrom:
+            secretKeyRef:
+              name: bucket
+              key: bucket_name
+
+        - name: AWS_S3_ENDPOINT_URL
+          valueFrom:
+            secretKeyRef:
+              name: bucket
+              key: endpoint_url
+
+        - name: AWS_S3_REGION_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: django-config
+              key: AWS_S3_REGION_NAME
+
+        - name: AWS_S3_SIGNATURE_VERSION
+          valueFrom:
+            configMapKeyRef:
+              name: django-config
+              key: AWS_S3_SIGNATURE_VERSION
+
+        - name: AWS_QUERYSTRING_AUTH
+          valueFrom:
+            configMapKeyRef:
+              name: django-config
+              key: AWS_QUERYSTRING_AUTH
+
+        - name: AWS_DEFAULT_ACL
+          valueFrom:
+            configMapKeyRef:
+              name: django-config
+              key: AWS_DEFAULT_ACL
+
+        - name: STATIC_URL
+          valueFrom:
+            configMapKeyRef:
+              name: django-config
+              key: STATIC_URL
+
+        - name: MEDIA_URL
+          valueFrom:
+            configMapKeyRef:
+              name: django-config
+              key: MEDIA_URL
+
+        - name: STATICFILES_STORAGE
+          valueFrom:
+            configMapKeyRef:
+              name: django-config
+              key: STATICFILES_STORAGE
+
+        - name: DEFAULT_FILE_STORAGE
+          valueFrom:
+            configMapKeyRef:
+              name: django-config
+              key: DEFAULT_FILE_STORAGE
+        
+        volumeMounts:
+        - name: postgres-ssl
+          mountPath: /etc/postgresql
+          readOnly: true
+      
+      volumes:
+      - name: postgres-ssl
+        secret:
+          secretName: postgres
+          items:
+          - key: root.crt
+            path: root.crt
+        
+         
+
+            
