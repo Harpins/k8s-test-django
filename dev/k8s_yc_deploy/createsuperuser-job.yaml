@@ -2,7 +2,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: django-createsuperuser
-  namespace: django-app
+  namespace: edu-igor-derevnin
 spec:
   ttlSecondsAfterFinished: 600  
   backoffLimit: 2 
