@@ -136,6 +136,7 @@ spec:
               mountPath: /etc/postgresql
               readOnly: true
           
+
           volumes:
           - name: postgres-ssl
             secret:
