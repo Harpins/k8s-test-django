@@ -3,3 +3,4 @@ environs[django]==14.3.0
 psycopg2-binary==2.8.5
 boto3==1.35.95
 gunicorn>=21.2.0
+django-storages>=1.14.4
