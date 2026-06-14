@@ -11,3 +11,14 @@ k8s/secret.yaml
 *.secret.yaml
 *.k8s\secret.yaml
 secret.txt
+
+**/overlays/*/secrets.yaml
+.dockerconfigjson
+
+*.tfstate
+*.tfstate.*
+.terraform/
+
+kubeconfig.yaml
+yc-kubeconfig
+EOF
