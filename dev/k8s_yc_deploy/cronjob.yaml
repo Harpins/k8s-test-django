@@ -5,7 +5,7 @@ metadata:
   namespace: edu-igor-derevnin
 spec:
   schedule: "0 3 * * *"
-  startingDeadlineSeconds: 1800  # 30 минут 
+  startingDeadlineSeconds: 1800
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 2
   concurrencyPolicy: Forbid
@@ -39,7 +39,6 @@ spec:
                 secretKeyRef:
                   name: django-secrets
                   key: secret-key
-
             - name: POSTGRES_HOST
               valueFrom:
                 secretKeyRef:
@@ -67,12 +66,10 @@ spec:
                   key: password
             - name: DATABASE_URL
               value: "postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@$(POSTGRES_HOST):$(POSTGRES_PORT)/$(POSTGRES_DB)"
-
             - name: PGSSLMODE
               value: "require"
             - name: PGSSLROOTCERT
               value: "/etc/postgresql/root.crt"
-
             - name: AWS_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
@@ -133,10 +130,8 @@ spec:
                 configMapKeyRef:
                   name: django-config
                   key: DEFAULT_FILE_STORAGE
-
-          restartPolicy: OnFailure
-          
-          volumeMounts:
+            
+            volumeMounts:
             - name: postgres-ssl
               mountPath: /etc/postgresql
               readOnly: true
@@ -148,3 +143,5 @@ spec:
               items:
               - key: root.crt
                 path: root.crt
+          
+          restartPolicy: OnFailure
