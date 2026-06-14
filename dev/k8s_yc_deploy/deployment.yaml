@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: django-deployment
+  namespace: edu-igor-derevnin  
+spec:
+  replicas: 2  
+  selector:
+    matchLabels:
+      app: django
+  template:
+    metadata:
+      labels:
+        app: django
+    spec:
+      containers:
+      - name: django
+        image: # ДОБАВИТЬ
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8000
+        #Django
+        env:
+        - name: DEBUG
+          valueFrom:
+            configMapKeyRef:
+              name: django-config
+              key: DEBUG
+        - name: ALLOWED_HOSTS
+          valueFrom:
+            configMapKeyRef:
+              name: django-config
+              key: ALLOWED_HOSTS
+        - name: SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: django-secrets
+              key: secret-key
+
+        #PSGR
+        - name: POSTGRES_DB
+          valueFrom:
+            secretKeyRef:
+              name: postgres
+              key: name
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: postgres
+              key: username
+        - name: POSTGRES_HOST
+          valueFrom:
+            secretKeyRef:
+              name: postgres
+              key: host
+        - name: POSTGRES_PORT
+          valueFrom:
+            secretKeyRef:
+              name: postgres
+              key: port
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres
+              key: password
+        - name: DATABASE_URL
+          value: "postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@$(POSTGRES_HOST):$(POSTGRES_PORT)/$(POSTGRES_DB)"
+
+        #SSL
+        - name: PGSSLMODE
+          value: "require"                          
+        - name: PGSSLROOTCERT
+          value: "/etc/postgresql/root.crt"        

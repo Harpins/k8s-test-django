@@ -43,7 +43,7 @@ docker compose run --rm web bash -c "sed -i 's/\r$//' manage.py && ./manage.py c
 
 ### Как обновить приложение из основного репозитория
 
-Чтобы обновить приложение до последней версии подтяните код из центрального окружения и пересоберите докер-образы:
+Чтобы обновить приложение до последней версии подтяните код из центрального окружения, выберите необходимую версию (local - для локальной разработки и тестировании в minikube, dev - для деплоя в yandex cloud) перейдите в соответствующую папку командой `cd local` или `cd dev` пересоберите докер-образы:
 
 ``` shell
 $ git pull
@@ -171,42 +171,42 @@ Write-Host "Пароль: $password"
 
 # Шаг 5: Настройте конфиги и секреты
 
-Для настройки конфигурации укажите актуальные данные в `k8s/configmap.yaml`. 
+Для настройки конфигурации укажите актуальные данные в `minikube/configmap.yaml`. 
 
-Для задания секретов используйте в качестве примера `k8s/secret_example.yaml`. Скопируйте его содержимое в `k8s/secret.yaml` и укажите в новом файле действительные значения переменных `secret-key` и `postgres-password`.
+Для задания секретов используйте в качестве примера `minikube/secret_example.yaml`. Скопируйте его содержимое в `minikube/secret.yaml` и укажите в новом файле действительные значения переменных `secret-key` и `postgres-password`.
 
 # Шаг 6: Примените манифесты В ПРАВИЛЬНОМ ПОРЯДКЕ
 
 ## 1. Определите пространство имен
 ```bash
-kubectl apply -f k8s/namespace.yaml
+kubectl apply -f minikube/namespace.yaml
 ```
 
 ## 2. Примените секреты и конфигурацию
 ```bash
-kubectl apply -f k8s/secrets.yaml
-kubectl apply -f k8s/configmap.yaml
+kubectl apply -f minikube/secrets.yaml
+kubectl apply -f minikube/configmap.yaml
 ```
 
 ## 3. Разверните приложение
 ```bash
-kubectl apply -f k8s/deployment.yaml
+kubectl apply -f minikube/deployment.yaml
 ```
 
 ## 4. Создайте сервис для доступа извне
 ```bash
-kubectl apply -f k8s/service.yaml
+kubectl apply -f minikube/service.yaml
 ```
 
 ## 5. Настройте Ingress (для доступа по домену)
 Подробности настройки на Windows [тут](#настройка-ingress-с-туннелированием-на-windows)
 ```bash
-kubectl apply -f k8s/ingress.yaml
+kubectl apply -f minikube/ingress.yaml
 ```
 
 ## 6. Настройте CronJob (автоматическая очистка сессий)
 ```bash
-kubectl apply -f k8s/cronjob.yaml
+kubectl apply -f minikube/cronjob.yaml
 ```
 По умолчанию очистка сессий проходит каждый день в 3:00 ночи. Для изменения расписания нужно отредактировать файл `cronjob.yaml`:
 
@@ -227,13 +227,13 @@ kubectl logs -n django-app -l app=django
 ## Запустите работу, исполняющую миграции и сборку статики
 
 ```bash
-kubectl apply -f k8s/migrate-and-colstatic-job.yaml
+kubectl apply -f minikube/migrate-and-colstatic-job.yaml
 ```
 
 ## Создайте суперпользователя
 
 ```bash
-kubectl apply -f k8s\createsuperuser-job.yaml
+kubectl apply -f minikube\createsuperuser-job.yaml
 ```
 
 # Настройка Ingress с туннелированием на Windows
@@ -252,7 +252,7 @@ minikube addons enable ingress
 
 #### 2. Создайте манифест Ingress
 
-В качестве примера используйте `k8s/ingress.yaml`
+В качестве примера используйте `minikube/ingress.yaml`
 
 
 #### 3. Запустите Minikube Tunnel
@@ -283,4 +283,4 @@ ipconfig /flushdns
 
 Откройте браузер и перейдите по адресу: `http://django.local`
 
-# Развертывание на сервере
+# Развертывание в k8s-облаке yandex-cloud

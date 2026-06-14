@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: django-service
+  namespace: edu-igor-derevnin          
+spec:
+  type: ClusterIP                        
+  selector:
+    app: django                         
+  ports:
+  - name: http
+    port: 80                             
+    targetPort: 8000                    
+    protocol: TCP
