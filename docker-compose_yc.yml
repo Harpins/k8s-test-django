@@ -1,0 +1,27 @@
+services:
+  db:
+    image: postgres:12.0-alpine
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+  web:
+    build: backend_main_django
+    image: django_app
+    volumes:
+      - ./backend_main_django:/code
+    environment: 
+      SECRET_KEY: ${SECRET_KEY}
+      DEBUG: ${DEBUG}
+      DATABASE_URL: ${DATABASE_URL}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS}
+    ports:
+      - 127.0.0.1:8080:80
+    depends_on:
+      - db
+
+volumes:
+  db_data:
