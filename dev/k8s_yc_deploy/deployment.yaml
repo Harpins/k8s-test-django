@@ -19,6 +19,7 @@ spec:
         imagePullPolicy: Always
         ports:
         - containerPort: 8000
+        
         #Django
         env:
         - name: DEBUG
