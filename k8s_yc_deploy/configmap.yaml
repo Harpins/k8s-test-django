@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: django-config
+data:
+  DEBUG: "False"
+  ALLOWED_HOSTS: "edu-igor-derevnin.yc-sirius-dev.pelid.team,localhost,127.0.0.1"
+  #AWS_ACCESS_KEY_ID: 
+  AWS_STORAGE_BUCKET_NAME: "edu-igor-derevnin"
+  AWS_S3_ENDPOINT_URL: "https://storage.yandexcloud.net"
+  AWS_S3_REGION_NAME: "ru-central1"
+  AWS_S3_CUSTOM_DOMAIN: "storage.yandexcloud.net"
+  
+  STATIC_URL: "https://storage.yandexcloud.net/edu-igor-derevnin/static/"
+  STATICFILES_STORAGE: "storages.backends.s3boto3.S3Boto3Storage"
+
+  MEDIA_URL: "https://storage.yandexcloud.net/edu-igor-derevnin/media/"
+  DEFAULT_FILE_STORAGE: "storages.backends.s3boto3.S3Boto3Storage"
+
+  DJANGO_PORT: "8000"
+
+  POSTGRES_PORT: "6432"
+  POSTGRES_OPTIONS: "sslmode=require"
+
+  SESSION_COOKIE_SECURE: "True"
+  CSRF_COOKIE_SECURE: "True"
+  SECURE_SSL_REDIRECT: "True" 
+  SECURE_HSTS_SECONDS: "31536000"
+  SECURE_HSTS_INCLUDE_SUBDOMAINS: "True"
+
+  SECURE_BROWSER_XSS_FILTER: "True"
+  SECURE_CONTENT_TYPE_NOSNIFF: "True"
+  X_FRAME_OPTIONS: "DENY"
+
+  LOG_LEVEL: "INFO"
+  DJANGO_LOG_LEVEL: "INFO"
