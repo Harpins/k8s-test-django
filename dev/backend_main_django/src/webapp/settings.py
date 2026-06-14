@@ -143,3 +143,67 @@ STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 MEDIAFILES_LOCATION = 'media'
 MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{MEDIAFILES_LOCATION}/'
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+
+SESSION_COOKIE_SECURE = os.environ.get('SESSION_COOKIE_SECURE', 'False') == 'True'
+
+CSRF_COOKIE_SECURE = os.environ.get('CSRF_COOKIE_SECURE', 'False') == 'True'
+
+SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'False') == 'True'
+
+SECURE_HSTS_SECONDS = int(os.environ.get('SECURE_HSTS_SECONDS', '0'))
+
+SECURE_HSTS_INCLUDE_SUBDOMAINS = os.environ.get('SECURE_HSTS_INCLUDE_SUBDOMAINS', 'False') == 'True'
+
+SECURE_BROWSER_XSS_FILTER = os.environ.get('SECURE_BROWSER_XSS_FILTER', 'False') == 'True'
+
+SECURE_CONTENT_TYPE_NOSNIFF = os.environ.get('SECURE_CONTENT_TYPE_NOSNIFF', 'False') == 'True'
+
+X_FRAME_OPTIONS = os.environ.get('X_FRAME_OPTIONS', 'DENY')
+
+
+LOG_LEVEL = os.environ.get('LOG_LEVEL', 'INFO')
+DJANGO_LOG_LEVEL = os.environ.get('DJANGO_LOG_LEVEL', 'INFO')
+
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': LOG_LEVEL,
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': DJANGO_LOG_LEVEL,
+            'propagate': False,
+        },
+        'django.request': {
+            'handlers': ['console'],
+            'level': DJANGO_LOG_LEVEL,
+            'propagate': False,
+        },
+        'django.db.backends': {
+            'handlers': ['console'],
+            'level': 'ERROR', 
+            'propagate': False,
+        },
+    },
+}

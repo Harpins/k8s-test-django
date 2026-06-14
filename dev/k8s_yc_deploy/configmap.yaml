@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: django-config
+  namespace: edu-igor-derevnin
+data:
+  DJANGO_SETTINGS_MODULE: "webapp.settings"
+  DEBUG: "False"
+  ALLOWED_HOSTS: "edu-igor-derevnin.yc-sirius-dev.pelid.team,localhost,127.0.0.1"
+ 
+  PGSSLMODE: "require"
+  PGSSLROOTCERT: "/etc/postgresql/root.crt"
+  
+  AWS_STORAGE_BUCKET_NAME: "edu-igor-derevnin"
+  AWS_S3_ENDPOINT_URL: "https://storage.yandexcloud.net"
+  AWS_S3_REGION_NAME: "ru-central1"
+  AWS_S3_SIGNATURE_VERSION: "s3v4"
+  AWS_QUERYSTRING_AUTH: "False"
+  AWS_DEFAULT_ACL: "public-read"
+  
+  SESSION_COOKIE_SECURE: "True"
+  CSRF_COOKIE_SECURE: "True"
+  SECURE_SSL_REDIRECT: "True"
+  SECURE_HSTS_SECONDS: "31536000"
+  SECURE_HSTS_INCLUDE_SUBDOMAINS: "True"
+  SECURE_BROWSER_XSS_FILTER: "True"
+  SECURE_CONTENT_TYPE_NOSNIFF: "True"
+  X_FRAME_OPTIONS: "DENY"
+  
+  LOG_LEVEL: "INFO"
+  DJANGO_LOG_LEVEL: "INFO"
