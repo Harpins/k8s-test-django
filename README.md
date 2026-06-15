@@ -339,10 +339,14 @@ ipconfig /flushdns
 [Руководство](https://yandex.cloud/ru/docs/cli/quickstart)
 
 После установки необходимо инициализировать CLI, авторизоваться, создать профиль, выбрать облако, кластер и настроить зону доступности. Процесс настройки запускается одной командой в интерактивном режиме:
-```yc init```
+```
+yc init
+```
 
 Для отдельного проекта рекомендуется создать новый профиль:
-```yc config profile create my-profile```
+```
+yc config profile create my-profile
+```
 
 
 #### 3. Подключение к готовому кластеру.
@@ -350,12 +354,16 @@ ipconfig /flushdns
 Убедитесь, что активен правильный профиль: Выполните ```yc config list``` и проверьте, что выбранное облако и кластер внутри него соответствуют вашему проекту.
 
 Загрузите настройки для доступа к кластеру:
-```yc managed-kubernetes cluster get-credentials --id cluster_id --external```
+```
+yc managed-kubernetes cluster get-credentials --id cluster_id --external
+```
 
 В Windows конфигурации хранятся по умолчанию по пути `C:\Users\User\.kube\config`
 
 Проверьте подключение к кластеру:
-```kubectl cluster-info```
+```
+kubectl cluster-info
+```
 
 Если команда выполнилась успешно и вы увидели информацию о мастере, то все настроено верно.
 
@@ -363,7 +371,9 @@ ipconfig /flushdns
 
 Перед публикацией необходимо собрать Docker образ Django приложения. Перейдите в директорию \dev\backend_main_django` и выполните команду:
 
-```docker build -t your_docker/django_app:your_tag -f backend_main_django/Dockerfile backend_main_django/```
+```
+docker build -t your_docker/django_app:your_tag -f backend_main_django/Dockerfile backend_main_django/
+```
 
 Авторизуйтесь в докере и опубликуйте образ.
 
