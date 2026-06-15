@@ -2,6 +2,15 @@
 
 Докеризированный сайт на Django для экспериментов с Kubernetes.
 
+Внутри репозитория две директории: 
+
+`dev` - сайт подготовлен к развертыванию в кластер Yandex Cloud. [Работающая версия сайта](https://edu-igor-derevnin.yc-sirius-dev.pelid.team)
+
+`local` - сайт подготовлен для локального развертывания в minikube.
+
+
+# Локальная разработка (вне контейнеров, `local\backend_main_django`)
+
 Внутри контейнера Django приложение запускается с помощью Nginx Unit, не путать с Nginx. Сервер Nginx Unit выполняет сразу две функции: как веб-сервер он раздаёт файлы статики и медиа, а в роли сервера-приложений он запускает Python и Django. Таким образом Nginx Unit заменяет собой связку из двух сервисов Nginx и Gunicorn/uWSGI. [Подробнее про Nginx Unit](https://unit.nginx.org/).
 
 ## Как подготовить окружение к локальной разработке
@@ -283,20 +292,137 @@ ipconfig /flushdns
 
 Откройте браузер и перейдите по адресу: `http://django.local`
 
-# Деплой в Yandex Cloud
-
-[Работающая версия сайта](https://edu-igor-derevnin.yc-sirius-dev.pelid.team)
+# Деплой в кластер Yandex Cloud
 
 ## Предварительные требования
 
 ### Ресурсы Yandex Cloud
-Для 
+
+#### 1. В рамках работы с Yandex Cloud в вашем [личном пространстве имен](https://yandex.cloud/ru/docs/managed-kubernetes/operations/kubernetes-cluster/kubernetes-cluster-namespace-create) должны быть выделены и предварительно настроены следующие ресурсы:
+
+* [Домен в связке с Yandex Application Load Balancer (ALB)](https://yandex.cloud/ru/docs/tutorials/web/application-load-balancer-website/console) 
+
+* [Managed PostgreSQL](https://yandex.cloud/ru/docs/managed-postgresql/)
+Для подключения к БД в секретах вашего пространства имен должны содержаться данные следующего характера:
+
+- host	
+- port	
+- name	
+- username	
+- password	
+- root.crt	
+- dsn	
+- driver
+- parameters
+
+Посмотреть секреты Postgres:
+
+`kubectl get secret postgres -n your-namespace -o yaml`
+
+* [Yandex Object Storage (S3)](https://yandex.cloud/ru/docs/storage/concepts/object) - для хранения статики и медиафайлов 
+
+Данные для доступа хранятся в секрете bucket.
+
+- access_key	
+- secret_key	
+- bucket_name	
+- endpoint_url	
+- bucket_url	
+- dsn	
+
+* [Предустановленный Nginx с Ingress](https://purpleschool.ru/knowledge-base/kubernetes/work-with-components/kubernetes-ingress-nginx) - дефолтная версия. Для деплоя требуется настраивать самостоятельно.
 
 
-Ресурс	Название	Назначение
-Namespace	edu-igor-derevnin	Изолированное пространство
-Domain	edu-igor-derevnin.yc-sirius-dev.pelid.team	Внешний доступ
-PostgreSQL	edu-igor-derevnin	Managed PostgreSQL
-S3 Bucket	edu-igor-derevnin	Object Storage для статики/медиа
-ALB	Настроен админом	Application Load Balancer
+#### 2. Установка Yandex Cloud CLI (YC CLI)
 
+Первый шаг — установить на локальную машину утилиту `yc`, через которую будет проводиться управление ресурсами.
+[Руководство](https://yandex.cloud/ru/docs/cli/quickstart)
+
+После установки необходимо инициализировать CLI, авторизоваться, создать профиль, выбрать облако, кластер и настроить зону доступности. Процесс настройки запускается одной командой в интерактивном режиме:
+`yc init`
+
+Для отдельного проекта рекомендуется создать новый профиль:
+`yc config profile create my-profile`
+
+
+#### 3. Подключение к готовому кластеру.
+
+Убедитесь, что активен правильный профиль: Выполните `yc config list` и проверьте, что выбранное облако и кластер внутри него соответствуют вашему проекту.
+
+Загрузите настройки для доступа к кластеру:
+`yc managed-kubernetes cluster get-credentials --id cluster_id --external`
+
+В Windows конфигурации хранятся по умолчанию по пути `C:\Users\User\.kube\config`
+
+Проверьте подключение к кластеру:
+`kubectl cluster-info`
+
+Если команда выполнилась успешно и вы увидели информацию о мастере, то все настроено верно.
+
+#### 4. Публикация Docker образа
+
+Перед публикацией необходимо собрать Docker образ Django приложения. Перейдите в директорию \dev\backend_main_django` и выполните команду:
+
+`docker build -t your_docker/django_app:your_tag -f backend_main_django/Dockerfile backend_main_django/`
+
+Авторизуйтесь в докере и опубликуйте образ.
+
+```bash
+docker login
+docker push your_docker/django_app:your_tag
+```
+Для отслеживания версий рекомендуется использовать хэш Git коммита.
+
+
+#### 5. Манифесты и порядок деплоя
+
+Все манифесты и настройки находятся в директории `k8s_yc_deploy`
+
+**Перед деплоем обязательно проверьте и обновите во всех манифестах кластерозависимые параметры: namespace, image, ALLOWED_HOSTS и др. переменные окружения.**
+
+После используйте команду  
+```
+kubectl apply -f <имя_файла.yaml> -n your-namespace
+```
+для применения манифестов в следующем порядке:
+
+1.	configmap.yaml	
+2.  secret.yaml	- создайте и заполните на примере secret_example.yaml
+3.	deployment.yaml	
+4.	service.yaml	
+5.	migrate-and-colstatic-job.yaml	- Миграции БД и сбор статики в S3	image, command, restartPolicy: Never	
+6.	createsuperuser-job.yaml- Создание суперпользователя	image, env (superuser данные)	
+7.	cronjob.yaml	- Очистка сессий (ежедневно в 3:00)	schedule: "0 3 * * *", command: clearsessions	
+
+psql-ssl.yaml	- Тестовый под для проверки связи с БД. Подгружать не обязательно
+
+После применения всех манифестов перезапустите django-deployment:
+
+```
+kubectl rollout restart deployment django-deployment -n your_namespace
+```
+
+#### 6. Nginx и Ingress
+
+nginx-configmap.yaml - Пример настроек Nginx, замените все кластерозависимые параметры в конфигурации на актуальные для вашего окружения, после чего:
+
+1. Удалите дефолтный ConfigMap
+```
+kubectl delete configmap main-nginx-config -n yournamespace
+```
+
+2. Активируйте манифест
+```
+kubectl apply -f nginx_configmap.yaml -n yournamespace
+```
+
+3. ingress_config.txt - Пример настроек Ingress. Аналогично актуализируйте все кластерозависимые параметры, после чего примените настройки.
+
+```
+kubectl apply -f ingress_config.txt -n yournamespace
+```
+
+4. Перезапустите Nginx
+```
+kubectl rollout restart deployment main-nginx -n yournamespace
+```
