@@ -392,9 +392,19 @@ docker push your_docker/django_app:your_tag
 
 
 Для применения индивидуальных манифестов используйте команду: 
-```
+
+```bash
 kubectl apply -f <имя_файла.yaml> -n your-namespace
 ```
+
+Предварительно можно задать текущее пространство имен командой:
+
+```bash
+kubectl config set-context --current --namespace=your-namespace
+```
+
+В этом случае команды применения манифестов можно использовать без флага `-n`
+
 Порядок применения манифестов:
 
 1.	configmap.yaml	
