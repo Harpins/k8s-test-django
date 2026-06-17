@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: django-deployment
+spec:
+  template:
+    spec:
+      containers:
+      - name: django
+        volumeMounts:
+        - name: postgres-ssl
+          mountPath: /etc/postgresql
+          readOnly: true
+      volumes:
+      - name: postgres-ssl
+        secret:
+          secretName: postgres
+          items:
+          - key: root.crt
+            path: root.crt

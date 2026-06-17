@@ -390,16 +390,35 @@ docker push your_docker/django_app:your_tag
 
 **Перед деплоем обязательно проверьте и обновите во всех манифестах кластерозависимые параметры: namespace, image, ALLOWED_HOSTS и др. переменные окружения.**
 
-После используйте команду  
+
+Для применения индивидуальных манифестов используйте команду: 
 ```
 kubectl apply -f <имя_файла.yaml> -n your-namespace
 ```
-для применения манифестов в следующем порядке:
+Порядок применения манифестов:
 
 1.	configmap.yaml	
 2.  secret.yaml	- создайте и заполните на примере secret_example.yaml
-3.	deployment.yaml	
-4.	service.yaml	
+3.	service.yaml	
+
+4. Проведите сборку и применение манифестов deployment с помощью `Kustomize`
+
+Если у вас `kubectl` версии 1.14 или новее, он уже содержит встроенную поддержку Kustomize
+
+Проверить версию kubectl и встроенного Kustomize:
+
+```bash
+kubectl version --client
+```
+
+Перейдите в папку deployment, Примените манифесты через kustomize, после вернитесь в директорию с остальными манифестами:
+
+```bash
+cd deployment/
+kustomize build . | kubectl apply -f -
+cd ..
+```
+
 5.	migrate-and-colstatic-job.yaml	- Миграции БД и сбор статики в S3	image, command, restartPolicy: Never	
 6.	createsuperuser-job.yaml- Создание суперпользователя	image, env (superuser данные)	
 7.	cronjob.yaml	- Очистка сессий (ежедневно в 3:00)	schedule: "0 3 * * *", command: clearsessions	
@@ -408,7 +427,7 @@ psql-ssl.yaml	- Тестовый под для проверки связи с Б
 
 После применения всех манифестов перезапустите django-deployment:
 
-```
+```bash
 kubectl rollout restart deployment django-deployment -n your_namespace
 ```
 
