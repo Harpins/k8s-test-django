@@ -2,13 +2,13 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: django-deployment
+  namespace: edu-igor-derevnin
 spec:
   template:
     spec:
       containers:
       - name: django
         env:
-        $patch: merge 
         - name: DEBUG
           valueFrom:
             configMapKeyRef:

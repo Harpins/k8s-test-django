@@ -4,8 +4,8 @@ kind: Kustomization
 resources:
 - base/deployment-base.yaml
 
-patchesStrategicMerge:
-- patches/django-env.yaml
-- patches/postgres-env.yaml
-- patches/s3-env.yaml
-- patches/volumes.yaml
+patches:
+- path: patches/django-env.yaml
+- path: patches/postgres-env.yaml
+- path: patches/s3-env.yaml
+- path: patches/volumes.yaml

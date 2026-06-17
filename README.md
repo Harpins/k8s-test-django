@@ -425,7 +425,7 @@ kubectl version --client
 
 ```bash
 cd deployment/
-kustomize build . | kubectl apply -f -
+kubectl apply -k .
 cd ..
 ```
 
